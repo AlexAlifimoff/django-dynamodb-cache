@@ -1,37 +1,43 @@
-"Amazon S3 cache backend for Django"
+"Amazon DynamoDB cache backend for Django"
 
-# Copyright (c) 2012,2017 Alexander Todorov <atodorov@MrSenko.com>
-#
-# Taken directly from django.core.cache.backends.filebased.FileBasedCache
-# and adapted for S3.
+# Copyright (c) 2018 Alex Alifimoff <alex@sixteenzero.net>
 
-import time
-import hashlib
-
-try:
-    import cPickle as pickle
-except ImportError:
-    import pickle
-
-from storages.backends import s3boto
+import boto3
 from django.core.files.base import ContentFile
 from django.core.cache.backends.base import BaseCache
 
-class DynamocDBCache(BaseCache):
+class DynamoDBCache(BaseCache):
     """
         Amazon DynamoDB cache backend for Django
     """
     def __init__(self):
-        pass
+        self._options = params.get('OPTIONS', {})
+
+        self.dynamo_client = boto3.resource(region_name=self._options['REGION_NAME'])
+        self.table = self.dynamo_client.Table(self._options['TABLE_NAME'])
+
+        self.partition_key_name = self._options['PARTITION_KEY_NAME']
 
     def add(self, key, value, timeout=None, version=None):
         pass
 
     def get(self, key, default=None, version=None):
-        pass
+        try:
+            key = {}
+            key[self.partition_key_name] = key
+            response = self.table.get_item(Key=key)
+        except ClientError as e:
+            print(e.response['Error']['Message'])
+        else:
+            return response['item']
 
     def set(self, key, value, timeout=None, version=None):
-        pass
+        item = {}
+        item[self.partition_key_name] = key
+        item['info'] = value
+        item['version'] = version
+        item['timeout'] = timeout
+        self.table.put_item(Item=item)
 
     def delete(self, key, version=None):
         pass
