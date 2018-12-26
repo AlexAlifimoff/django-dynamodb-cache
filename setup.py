@@ -4,9 +4,6 @@
 import sys
 from setuptools import setup, find_packages
 
-with open('README.rst') as file:
-    long_description = file.read()
-
 config = {
     'name' : 'django-django-cache',
     'version' : '0.0.1',
@@ -15,7 +12,6 @@ config = {
     'author_email' : 'alex@sixteenzero.net',
     'license' : 'BSD',
     'description' : 'Amazon DynamoDB cache backend for Django',
-    'long_description' : long_description,
     'url' : 'https://github.com/AlexAlifimmoff/django-dynamocdb-cache',
     'keywords' : ['Amazon', 'DynamoDB', 'Django', 'cache'],
     'zip_safe' : False,
